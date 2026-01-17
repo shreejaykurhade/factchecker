@@ -3,21 +3,34 @@ const { HumanMessage, SystemMessage } = require("@langchain/core/messages");
 
 async function graderAgent(state) {
     const { messages } = state;
+    const originalQuery = messages[0].content;
     const analysisMsg = messages[messages.length - 1];
     const analysisContent = analysisMsg.content;
 
     console.log(`[Grader] Grading the analysis...`);
 
-    const systemPrompt = `You are a Trust Scorer (Grader).
-  Your task is to assign a reliability score (0-100) to the fact-check analysis provided.
+    const systemPrompt = `You are a Truth Adjudicator.
+  Your task is to assign a **Truth Score (0-100)** by evaluating the **Analysis Content**.
 
   Current Date: ${new Date().toDateString()}
+  User Query: "${originalQuery}"
   
-  Criteria:
-  - Consistency (Does the evidence text match the claim?): HIGHEST PRIORITY.
-  - Conclusion Agreement (If Analyst says TRUE and provides snippets, score MUST be > 80).
-  - Source Authority (Is it from standard news?): Good points.
-  - URL Relevance (Ignore strictly matching URL slugs if the snippet text is relevant. News sites often redirect or have messy URLs).
+  CRITICAL RULES:
+  1. **IGNORE SOURCE URL TITLES**. The search engine sometimes returns messy URLs (e.g., "Horoscope" or "NFL" pages that contain relevant news snippets).
+  2. **FOCUS ON THE ANALYSIS CONTENT**: Read the Conclusion, Summary, and Evidence sections.
+  3. **COMPARE**: Does the Evidence TEXT support or contradict the User Query?
+  
+  SCORING:
+  - If **Conclusion: True** AND the Evidence section contains relevant facts supporting the query → Score **85-100**.
+  - If **Conclusion: False** AND the Evidence shows the query is debunked → Score **0-15**.
+  - If **Conclusion: Misleading** or unclear → Score **40-60**.
+  
+  QUALITY BONUSES (if Conclusion: True):
+  - **100**: Multiple detailed evidence points (3+) with specific facts/dates.
+  - **90-95**: 2-3 solid evidence points.
+  - **80-85**: Single evidence point or weaker support.
+
+  DO NOT penalize based on URL titles like "Horoscope" or "NFL" in the Sources section.
   
   Output ONLY a JSON object:
   {
@@ -58,8 +71,10 @@ async function graderAgent(state) {
         };
     } catch (error) {
         console.error("[Grader] Error:", error);
+        const errorGrading = { score: 0, reasoning: "Error in grading" };
         return {
-            messages: [new HumanMessage({ content: JSON.stringify({ score: 0, reasoning: "Error in grading" }), name: "grader_error" })]
+            messages: [new HumanMessage({ content: JSON.stringify(errorGrading), name: "grader_error" })],
+            grading_data: errorGrading
         }
     }
 }

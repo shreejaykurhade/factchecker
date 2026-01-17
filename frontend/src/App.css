@@ -237,3 +237,115 @@ h1 {
     padding: 0.2rem 0.5rem;
     background: white;
 }
+
+/* ===== RESPONSIVE DESIGN ===== */
+
+/* Mobile phones (up to 768px) */
+@media (max-width: 768px) {
+    .container {
+        padding: 1rem;
+    }
+
+    .navbar {
+        padding: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .nav-brand {
+        font-size: 1.2rem;
+    }
+
+    .nav-links {
+        flex-direction: column;
+        gap: 0.5rem !important;
+        width: 100%;
+        margin-top: 1rem;
+    }
+
+    .nav-links a {
+        margin-left: 0;
+        font-size: 0.9rem;
+        width: 100%;
+        justify-content: center;
+        padding: 0.5rem;
+    }
+
+    .user-badge {
+        font-size: 0.8rem;
+        text-align: center;
+        width: 100%;
+    }
+
+    h1 {
+        font-size: 2.5rem !important;
+    }
+
+    h2 {
+        font-size: 1.5rem !important;
+    }
+
+    h3 {
+        font-size: 1.2rem !important;
+    }
+
+    .brutal-btn {
+        padding: 0.8rem 1.5rem;
+        font-size: 0.9rem;
+        width: 100%;
+    }
+
+    .brutal-box {
+        padding: 1rem;
+    }
+
+    .score-card h1 {
+        font-size: 3.5rem !important;
+    }
+
+    input {
+        font-size: 1rem;
+        padding: 0.8rem;
+    }
+
+    /* Landing page mobile */
+    .hero-section {
+        padding: 0 1rem !important;
+        margin-top: 3rem !important;
+    }
+
+    .landing-page section {
+        padding: 2rem 1rem !important;
+    }
+}
+
+/* Tablets (769px to 1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .container {
+        padding: 1.5rem;
+    }
+
+    .navbar {
+        padding: 1.2rem 1.5rem;
+    }
+
+    h1 {
+        font-size: 3.5rem !important;
+    }
+
+    .brutal-btn {
+        font-size: 1rem;
+        padding: 0.9rem 1.8rem;
+    }
+}
+
+/* Small devices - stack grid layouts */
+@media (max-width: 640px) {
+    [style*="display: grid"] {
+        grid-template-columns: 1fr !important;
+    }
+
+    [style*="display: flex"][style*="gap"] {
+        flex-direction: column;
+        align-items: stretch !important;
+    }
+}

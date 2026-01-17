@@ -26,21 +26,20 @@ async function analystAgent(state) {
   5. Be CONCISE.
   
   Output Format:
-  3. clearly state if the original claim is TRUE, FALSE, or MISLEADING based on the evidence.
-  4. Highlight any contradictions between sources if they exist.
-  5. Cite the sources (URL and Name) which support your conclusion.
-  
-  Output Format:
   - Conclusion: [True/False/Misleading]
   - Summary: [Detailed explanation]
   - Evidence: [Bulleted list of facts from snippets]
-  - Sources: [List of URLs]
+  
+  ### Sources
+  - [Title of Source 1](URL 1)
+  - [Title of Source 2](URL 2)
+  (Ensure these are valid, clickable Markdown links from the provided search results).
   `;
 
     try {
         const result = await generateWithFallback([
             new SystemMessage(systemPrompt),
-            new HumanMessage(`Analyze these search results: ${searchResults}`)
+            new HumanMessage(`Analyze these search results: ${searchResults} `)
         ], 0.2);
 
         return {
