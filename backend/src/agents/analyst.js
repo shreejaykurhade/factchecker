@@ -1,28 +1,31 @@
-const { ChatGoogleGenerativeAI } = require("@langchain/google-genai");
+const { generateWithFallback } = require("../services/llm");
 const { HumanMessage, SystemMessage } = require("@langchain/core/messages");
-
-const llm = new ChatGoogleGenerativeAI({
-    model: "gemini-1.5-flash",
-    temperature: 0.2, // Low temperature for more factual reasoning
-    maxOutputTokens: 2048,
-});
 
 async function analystAgent(state) {
     const { messages } = state;
-    // The investigator results should be the last message
+    // The first message is the original user query
+    const originalQuery = messages[0].content;
     const investigatorMsg = messages[messages.length - 1];
     const searchResults = investigatorMsg.content;
 
-    console.log(`[Analyst] Analyzing search results...`);
+    console.log(`[Analyst] Analyzing search results for query: "${originalQuery}"...`);
 
     const systemPrompt = `You are a Fact-Checking Analyst for the Indian ecosystem. 
   Your goal is to analyze search snippets and find "Conflict of Facts".
   
-  Input: JSON string of search results from trusted Indian sources (BoomLive, AltNews, PIB, etc.).
+  Current Date: ${new Date().toDateString()}
+  User Query: "${originalQuery}"
+  
+  Input: JSON string of search results from trusted Indian sources.
   
   Task:
-  1. Read the search snippets carefully.
-  2. Synthesize the findings.
+  1. Analyze snippets for FACTS.
+  2. **CRITICAL**: Focus ONLY on valid facts related to the User Query ("${originalQuery}").
+  3. **IGNORE** any search results/news snippets that are irrelevant to the User Query (e.g. if query is about "Delhi Fog", ignore "Maharashtra Elections" or "Sports").
+  4. STRICTLY GROUND your analysis in the provided text. DO NOT Hallucinate.
+  5. Be CONCISE.
+  
+  Output Format:
   3. clearly state if the original claim is TRUE, FALSE, or MISLEADING based on the evidence.
   4. Highlight any contradictions between sources if they exist.
   5. Cite the sources (URL and Name) which support your conclusion.
@@ -35,10 +38,10 @@ async function analystAgent(state) {
   `;
 
     try {
-        const result = await llm.invoke([
+        const result = await generateWithFallback([
             new SystemMessage(systemPrompt),
             new HumanMessage(`Analyze these search results: ${searchResults}`)
-        ]);
+        ], 0.2);
 
         return {
             messages: [result],
@@ -52,4 +55,4 @@ async function analystAgent(state) {
     }
 }
 
-module.exports = { analystAgent, llm };
+module.exports = { analystAgent };

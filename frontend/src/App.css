@@ -1,16 +1,16 @@
 :root {
-    --bg-color: #f8f0e3;
-    /* Light Cream */
-    --text-color: #1a1a1a;
-    --accent-color: #7b2cbf;
-    /* Vivid Purple */
-    --secondary-color: #2a9d8f;
-    /* Teal */
-    --highlight-color: #e9c46a;
-    /* Saffron/Yellow */
-    --error-color: #e76f51;
-    /* Burnt Orange */
-    --border-width: 3px;
+    --bg-color: #f0f0f0;
+    /* Light Grey */
+    --text-color: #111111;
+    /* Black */
+    --accent-color: #ff2a2a;
+    /* Bright Red */
+    --secondary-color: #0066ff;
+    /* Bright Blue */
+    --highlight-color: #ffdb00;
+    /* Bright Yellow */
+    --error-color: #ff2a2a;
+    --border-width: 4px;
     --shadow-offset: 6px;
 }
 
@@ -110,7 +110,8 @@ body {
     align-items: center;
     padding: 1.5rem 2rem;
     border-bottom: var(--border-width) solid black;
-    background: #f0f0f0;
+    background: white;
+    box-shadow: 0px 4px 0px 0px rgba(0, 0, 0, 0.1);
 }
 
 .nav-brand {
@@ -121,6 +122,7 @@ body {
     font-size: 1.5rem;
     text-transform: uppercase;
     letter-spacing: -1px;
+    color: var(--accent-color);
 }
 
 .nav-links a {
@@ -132,17 +134,13 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
+    transition: color 0.2s;
 }
 
 .nav-links a:hover {
-    background: var(--accent-color);
-    color: white;
-    padding: 0.2rem 0.5rem;
-}
-
-.nav-links button {
-    margin-left: 2rem;
-    padding: 0.5rem 1rem;
+    background: var(--highlight-color);
+    color: black;
+    box-shadow: 3px 3px 0px black;
 }
 
 /* Forms */
@@ -153,12 +151,14 @@ input {
     font-size: 1.2rem;
     width: 100%;
     outline: none;
-    background: #f9f9f9;
+    background: white;
+    transition: all 0.2s;
 }
 
 input:focus {
-    background: #ffffcc;
-    /* Light yellow focus */
+    background: #fff;
+    border-color: var(--accent-color);
+    box-shadow: 4px 4px 0px var(--accent-color);
 }
 
 /* Headers */
@@ -171,13 +171,19 @@ h3 {
 }
 
 h1 {
-    font-size: 4rem;
+    font-size: 4.5rem;
     line-height: 0.9;
+    text-shadow: 4px 4px 0px rgba(0, 0, 0, 0.1);
 }
 
-/* Cards */
-.result-section {
-    margin-top: 3rem;
+/* Footer */
+.footer {
+    border-top: var(--border-width) solid black;
+    padding: 2rem;
+    background: black;
+    color: white;
+    text-align: center;
+    margin-top: auto;
 }
 
 .score-card {

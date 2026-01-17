@@ -7,12 +7,16 @@ const INDIAN_FACT_CHECK_DOMAINS = [
     "newschecker.in",
     "vishvasnews.com",
     "pib.gov.in",
-    "india.gov.in",
-    "digitalindia.gov.in",
-    "reuters.com",
-    "thehindu.com",
+    "newsmobile.in",
+    "thequint.com",
+    "indiatoday.in",
+    "timesofindia.indiatimes.com",
+    "hindustantimes.com",
     "indianexpress.com",
-    "pti.in"
+    "thehindu.com",
+    "ndtv.com",
+    "airnewsalerts.com",
+    "ddnews.gov.in"
 ];
 
 async function investigatorAgent(state) {
@@ -20,7 +24,16 @@ async function investigatorAgent(state) {
     const lastMessage = messages[messages.length - 1];
     const query = lastMessage.content;
 
-    console.log(`[Investigator] Searching for: ${query}`);
+    const monthNames = ["January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    ];
+    const d = new Date();
+    const dateContext = `${monthNames[d.getMonth()]} ${d.getFullYear()}`;
+
+    // Append context to prioritize recent news as per user request
+    const enhancedQuery = `${query} ${dateContext}`;
+
+    console.log(`[Investigator] Searching for: ${enhancedQuery}`);
 
     try {
         const response = await fetch("https://api.tavily.com/search", {
@@ -30,10 +43,11 @@ async function investigatorAgent(state) {
             },
             body: JSON.stringify({
                 api_key: process.env.TAVILY_API_KEY,
-                query: query,
+                query: enhancedQuery,
                 include_domains: INDIAN_FACT_CHECK_DOMAINS,
+                topic: "news", // Prioritize news
                 max_results: 5,
-                search_depth: "basic"
+                search_depth: "advanced"
             })
         });
 
