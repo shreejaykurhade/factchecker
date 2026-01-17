@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { API_ENDPOINTS } from '../config/api';
 import { ArrowLeft, Loader } from 'lucide-react';
 
 const Result = () => {
@@ -15,7 +16,7 @@ const Result = () => {
 
     const fetchResult = async () => {
         try {
-            const response = await axios.get(`http://localhost:3000/api/history/${id}`);
+            const response = await axios.get(API_ENDPOINTS.HISTORY_BY_ID(id));
             setData(response.data);
         } catch (err) {
             console.error(err);
@@ -65,7 +66,7 @@ const Result = () => {
                                 e.preventDefault();
                                 try {
                                     if (!confirm('Escalate this case to the Truth DAO for voting?')) return;
-                                    await axios.post('http://localhost:3000/api/dao/escalate', { historyId: data._id });
+                                    await axios.post(API_ENDPOINTS.DAO_ESCALATE, { historyId: data._id });
                                     alert('Case escalated to Truth DAO!');
                                     fetchResult(); // Refresh
                                 } catch (err) {
@@ -86,7 +87,7 @@ const Result = () => {
             </div>
 
             {data.grading && (
-                <div className={`score-card ${getScoreClass(data.grading.score)}`}>
+                <div className={`score - card ${getScoreClass(data.grading.score)} `}>
                     <h1 style={{ fontSize: '6rem', margin: 0 }}>{data.grading.score}</h1>
                     <h3>TRUST SCORE</h3>
                     <p style={{ fontStyle: 'italic', fontSize: '1.2rem' }}>"{data.grading.reasoning}"</p>

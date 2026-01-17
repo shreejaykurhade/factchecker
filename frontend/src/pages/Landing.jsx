@@ -42,7 +42,7 @@ const Landing = () => {
                 </div>
             </header>
 
-            <section style={{ background: 'var(--highlight-color)', padding: '4rem 2rem', marginBottom: '4rem' }} className="slide-in-left">
+            <section style={{ padding: '4rem 2rem', marginBottom: '4rem' }} className="slide-in-left">
                 <div className="container">
                     <h2 style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', marginBottom: '2rem', textAlign: 'center', fontWeight: '900' }}>
                         WHY YOU NEED CheckIT
@@ -111,7 +111,7 @@ const Landing = () => {
                 </div>
             </section>
 
-            <section style={{ background: 'black', color: 'white', padding: '4rem 2rem', marginBottom: '4rem' }}>
+            <section style={{ padding: '4rem 2rem', marginBottom: '4rem' }}>
                 <div className="container" style={{ textAlign: 'center' }}>
                     <h2 style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', marginBottom: '2rem', fontWeight: '900', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem' }}>
                         <Scale size={56} /> THE TRUTH DAO
@@ -122,19 +122,19 @@ const Landing = () => {
                         - a decentralized community of verified fact-checkers and journalists.
                     </p>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem', textAlign: 'left' }}>
-                        <div style={{ padding: '2rem', background: 'rgba(255,255,255,0.1)', border: '3px solid white' }}>
+                        <div style={{ padding: '2rem', background: 'white', border: '5px solid black' }}>
                             <h3 style={{ fontSize: '1.8rem', fontWeight: '800', marginBottom: '1rem' }}>1. Auto-Escalation</h3>
                             <p style={{ fontSize: '1.1rem', lineHeight: '1.6' }}>
                                 Contradictory sources? No problem. Cases with ambiguous scores are sent to the community for human review.
                             </p>
                         </div>
-                        <div style={{ padding: '2rem', background: 'rgba(255,255,255,0.1)', border: '3px solid white' }}>
+                        <div style={{ padding: '2rem', background: 'white', border: '5px solid black' }}>
                             <h3 style={{ fontSize: '1.8rem', fontWeight: '800', marginBottom: '1rem' }}>2. Community Voting</h3>
                             <p style={{ fontSize: '1.1rem', lineHeight: '1.6' }}>
                                 Token holders vote TRUE or FALSE with reasoning. Majority consensus determines the final verdict.
                             </p>
                         </div>
-                        <div style={{ padding: '2rem', background: 'rgba(255,255,255,0.1)', border: '3px solid white' }}>
+                        <div style={{ padding: '2rem', background: 'white', border: '5px solid black' }}>
                             <h3 style={{ fontSize: '1.8rem', fontWeight: '800', marginBottom: '1rem' }}>3. Incentivized Truth</h3>
                             <p style={{ fontSize: '1.1rem', lineHeight: '1.6' }}>
                                 Voters aligned with the eventual truth earn rewards, creating an "Incentivized Truth Market."
@@ -144,25 +144,25 @@ const Landing = () => {
                 </div>
             </section>
 
-            <section style={{ background: 'var(--secondary-color)', color: 'white', padding: '4rem 2rem', marginBottom: '4rem' }}>
+            <section style={{ padding: '4rem 2rem', marginBottom: '4rem' }}>
                 <div className="container" style={{ textAlign: 'center' }}>
                     <h2 style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', marginBottom: '2rem', fontWeight: '900' }}>
                         HOW TO USE CheckIT
                     </h2>
                     <div style={{ maxWidth: '800px', margin: '0 auto', textAlign: 'left' }}>
-                        <div style={{ marginBottom: '2rem', padding: '1.5rem', background: 'rgba(255,255,255,0.1)', border: '3px solid white' }}>
+                        <div style={{ marginBottom: '2rem', padding: '1.5rem', background: 'white', border: '5px solid black' }}>
                             <h3 style={{ fontSize: '1.8rem', fontWeight: '800', marginBottom: '0.5rem' }}>Step 1: Enter Your Query</h3>
                             <p style={{ fontSize: '1.1rem', lineHeight: '1.6' }}>
                                 Type any claim you want to verify: "Delhi flights delayed due to fog", "Did X politician say Y?", "Is Z news true?"
                             </p>
                         </div>
-                        <div style={{ marginBottom: '2rem', padding: '1.5rem', background: 'rgba(255,255,255,0.1)', border: '3px solid white' }}>
+                        <div style={{ marginBottom: '2rem', padding: '1.5rem', background: 'white', border: '5px solid black' }}>
                             <h3 style={{ fontSize: '1.8rem', fontWeight: '800', marginBottom: '0.5rem' }}>Step 2: AI Investigates</h3>
                             <p style={{ fontSize: '1.1rem', lineHeight: '1.6' }}>
                                 Our system searches 15+ trusted sources in real-time, analyzing the latest news from PIB, Times of India, NDTV, and more.
                             </p>
                         </div>
-                        <div style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.1)', border: '3px solid white' }}>
+                        <div style={{ padding: '1.5rem', background: 'white', border: '5px solid black' }}>
                             <h3 style={{ fontSize: '1.8rem', fontWeight: '800', marginBottom: '0.5rem' }}>Step 3: Get Your Truth Score</h3>
                             <p style={{ fontSize: '1.1rem', lineHeight: '1.6' }}>
                                 Receive a detailed analysis with evidence, sources, and a Truth Score. 100 = Verified True. 0 = Proven False.

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { Clock, Users, ChevronDown, ChevronUp, Scale } from 'lucide-react';
+import { API_ENDPOINTS } from '../config/api';
 
 const DAOCases = () => {
     const [cases, setCases] = useState([]);
@@ -15,7 +16,7 @@ const DAOCases = () => {
 
     const fetchPendingCases = async () => {
         try {
-            const response = await axios.get('http://localhost:3000/api/dao/pending');
+            const response = await axios.get(API_ENDPOINTS.DAO_PENDING);
             setCases(response.data);
         } catch (error) {
             console.error('Error fetching cases:', error);

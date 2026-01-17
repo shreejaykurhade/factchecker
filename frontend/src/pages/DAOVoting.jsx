@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ThumbsUp, ThumbsDown, Users, Clock, Scale, Wallet, AlertCircle, User } from 'lucide-react';
+import { API_ENDPOINTS } from '../config/api';
 
 const DAOVoting = () => {
     const { caseId } = useParams();
@@ -26,7 +27,7 @@ const DAOVoting = () => {
 
     const fetchCase = async () => {
         try {
-            const response = await axios.get(`http://localhost:3000/api/dao/case/${caseId}`);
+            const response = await axios.get(API_ENDPOINTS.DAO_CASE(caseId));
             setCaseData(response.data);
         } catch (error) {
             console.error('Error fetching case:', error);
@@ -41,7 +42,7 @@ const DAOVoting = () => {
 
         setSubmitting(true);
         try {
-            await axios.post('http://localhost:3000/api/dao/vote', {
+            await axios.post(API_ENDPOINTS.DAO_VOTE, {
                 caseId,
                 voterAddress, // Using the simulated ID
                 vote,

@@ -1,24 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Search, Loader, Scale, Clock, TrendingUp, Lightbulb } from 'lucide-react';
+import { Search, TrendingUp, AlertTriangle, CheckCircle, Loader, Plus, FileText, ChevronRight, Lightbulb, Clock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { API_ENDPOINTS } from '../config/api';
 
 const Home = () => {
     const [query, setQuery] = useState('');
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState(null);
     const [error, setError] = useState(null);
-    const [recentSearches, setRecentSearches] = useState([]);
+    const [recentChecks, setRecentChecks] = useState([]); // Changed from recentSearches
     const navigate = useNavigate();
 
     useEffect(() => {
-        fetchRecentSearches();
+        fetchRecentChecks(); // Changed from fetchRecentSearches
     }, []);
 
-    const fetchRecentSearches = async () => {
+    const fetchRecentChecks = async () => { // Changed function name
         try {
-            const response = await axios.get('http://localhost:3000/api/history');
-            setRecentSearches(response.data.slice(0, 5)); // Get last 5
+            const response = await axios.get(API_ENDPOINTS.HISTORY);
+            setRecentChecks(response.data.slice(0, 5)); // Latest 5last 5 // Changed state variable and comment
         } catch (error) {
             console.error('Error fetching recent searches:', error);
         }
@@ -33,9 +34,10 @@ const Home = () => {
         setResult(null);
 
         try {
-            const response = await axios.post('http://localhost:3000/api/check', { query });
-            setResult(response.data);
-            fetchRecentSearches(); // Refresh recent searches
+            const response = await axios.post(API_ENDPOINTS.CHECK, { query });
+            const { analysis, grading, daoCase, full_state } = response.data; // Added destructuring
+            setResult(response.data); // Keep this line to set the full result
+            fetchRecentChecks(); // Refresh recent searches // Changed function call
         } catch (err) {
             setError(err.response?.data?.error || 'An error occurred');
         } finally {
@@ -108,13 +110,13 @@ const Home = () => {
                     </form>
 
                     {/* Recent Searches */}
-                    {recentSearches.length > 0 && (
+                    {recentChecks.length > 0 && (
                         <div className="brutal-box" style={{ marginBottom: '2rem', borderLeft: '10px solid var(--secondary-color)' }}>
                             <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: 0 }}>
                                 <Clock size={24} /> RECENT SEARCHES
                             </h3>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '1rem' }}>
-                                {recentSearches.map((item) => (
+                                {recentChecks.map((item) => (
                                     <div
                                         key={item._id}
                                         onClick={() => handleRecentSearchClick(item.query)}

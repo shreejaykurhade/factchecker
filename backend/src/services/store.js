@@ -27,11 +27,30 @@ async function saveResult(query, result) {
 async function getHistory() {
     const db = getDB();
     if (db) {
-        return await db.collection(COLLECTION_HISTORY)
+        const history = await db.collection(COLLECTION_HISTORY)
             .find({})
             .sort({ timestamp: -1 })
             .limit(20)
             .toArray();
+
+        // For each escalated item, fetch its DAO case votes
+        for (let item of history) {
+            if (item.isEscalated) {
+                try {
+                    // Find the DAO case that matches this query
+                    const daoCase = await db.collection('dao_cases').findOne({ query: item.query });
+                    if (daoCase && daoCase.votes) {
+                        const trueVotes = daoCase.votes.filter(v => v.vote === 'true').length;
+                        const falseVotes = daoCase.votes.filter(v => v.vote === 'false').length;
+                        item.daoVotes = { trueVotes, falseVotes };
+                    }
+                } catch (e) {
+                    console.error('Error fetching DAO votes for history item:', e);
+                }
+            }
+        }
+
+        return history;
     }
     return memoryStore;
 }

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import { ThumbsUp, ThumbsDown } from 'lucide-react';
+import { API_ENDPOINTS } from '../config/api';
 
 const History = () => {
     const [history, setHistory] = useState([]);
@@ -12,7 +14,7 @@ const History = () => {
 
     const fetchHistory = async () => {
         try {
-            const response = await axios.get('http://localhost:3000/api/history');
+            const response = await axios.get(API_ENDPOINTS.HISTORY);
             setHistory(response.data);
         } catch (error) {
             console.error(error);
@@ -92,6 +94,20 @@ const History = () => {
                                             return null;
                                         })()}
                                     </div>
+
+                                    {/* Vote Counts for Escalated Items */}
+                                    {item.isEscalated && item.daoVotes && (
+                                        <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem', fontSize: '0.8rem' }}>
+                                            <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.3rem', background: '#4cd137', color: 'white', padding: '0.4rem', borderRadius: '3px', border: '2px solid black' }}>
+                                                <ThumbsUp size={14} />
+                                                <strong>{item.daoVotes.trueVotes || 0}</strong>
+                                            </div>
+                                            <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.3rem', background: '#e84118', color: 'white', padding: '0.4rem', borderRadius: '3px', border: '2px solid black' }}>
+                                                <ThumbsDown size={14} />
+                                                <strong>{item.daoVotes.falseVotes || 0}</strong>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                                 <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '2px solid black', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                                     <Link to={`/app/result/${item._id}`} style={{ textDecoration: 'none', color: 'black', fontWeight: 'bold' }}>
@@ -105,7 +121,7 @@ const History = () => {
                                                 e.preventDefault();
                                                 try {
                                                     if (!confirm('Escalate this case to the Truth DAO for voting?')) return;
-                                                    await axios.post('http://localhost:3000/api/dao/escalate', { historyId: item._id });
+                                                    await axios.post(API_ENDPOINTS.DAO_ESCALATE, { historyId: item._id });
                                                     alert('Case escalated to Truth DAO!');
                                                     fetchHistory(); // Refresh to hide button
                                                 } catch (err) {
