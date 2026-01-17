@@ -1,34 +1,5 @@
 const { HumanMessage } = require("@langchain/core/messages");
-
-// Helper to perform a single Tavily search
-async function performSearch(query, type) {
-    try {
-        const response = await fetch("https://api.tavily.com/search", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                api_key: process.env.TAVILY_API_KEY,
-                query: query,
-                search_depth: "advanced",
-                include_answer: true,
-                max_results: 5,
-                topic: "general"
-            })
-        });
-
-        if (!response.ok) return { type, error: `API Error: ${response.status}`, results: [] };
-
-        const data = await response.json();
-        return {
-            type,
-            query,
-            results: data.results || [],
-            answer: data.answer
-        };
-    } catch (e) {
-        return { type, error: e.message, results: [] };
-    }
-}
+const { searchGeneric } = require("../mcp/tools");
 
 async function parallelInvestigatorAgent(state) {
     const messages = state.messages;
@@ -37,13 +8,15 @@ async function parallelInvestigatorAgent(state) {
     console.log(`[ParallelInvestigator] Starting triple-check for: "${originalQuery}"`);
 
     // 1. Direct Verification
-    const p1 = performSearch(originalQuery, "Main Investigation");
+    // We use searchGeneric here for parallelism, but we could also use searchIndianFactCheckers for the main one.
+    // For consistency with the "Parallel" concept, let's use the generic search but labelled.
+    const p1 = searchGeneric(originalQuery, { max_results: 5 }).then(res => ({ type: "Main Investigation", ...res }));
 
     // 2. Skeptical/Variant Check
-    const p2 = performSearch(`${originalQuery} hoax fake facts`, "Skeptical Check");
+    const p2 = searchGeneric(`${originalQuery} hoax fake facts`, { max_results: 5 }).then(res => ({ type: "Skeptical Check", ...res }));
 
     // 3. Background/Context Check
-    const p3 = performSearch(`${originalQuery} background history details`, "Context Check");
+    const p3 = searchGeneric(`${originalQuery} background history details`, { max_results: 5 }).then(res => ({ type: "Context Check", ...res }));
 
     const results = await Promise.all([p1, p2, p3]);
 

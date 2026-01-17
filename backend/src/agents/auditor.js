@@ -1,6 +1,8 @@
 const { HumanMessage } = require("@langchain/core/messages");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
+const { AUDITOR_PROMPT } = require("../mcp/prompts");
+
 async function auditorAgent(state) {
     const { investigation_data } = state;
     // We assume 'investigation_data' contains the raw search results from the previous step (Investigator)
@@ -10,26 +12,10 @@ async function auditorAgent(state) {
 
     // The auditor has a strict persona
     const prompt = `
-        You are the **INTERNAL AUDITOR** for the Truth DAO. 
-        Your job is to RE-EVALUATE the findings of a TRIPLE-CHECK investigation to eliminate hallucinations, inconsistencies, and bias.
+        ${AUDITOR_PROMPT}
 
         ## INPUT DATA (3 Parallel Investigations):
         ${JSON.stringify(investigation_data)}
-
-        ## INSTRUCTIONS:
-        1.  **Synthesize Findings**: You have data from 3 separate search streams (Main, Skeptical, Context). Look for patterns across them.
-        2.  **Cross-Verification**: If the "Skeptical" search found hoax reports that the "Main" search missed, highlighting this is CRITICAL.
-        3.  **No Hallucinations**: Do NOT add facts that are not present in the snippets.
-        4.  **Final Verdict**: Provide a concise summary for the DAO Voters.
-
-        ## OUTPUT FORMAT (JSON):
-        {
-            "summary": "Concise, neutral summary of the facts, noting if sources agree.",
-            "evidence": ["Bullet point 1 (cited from Main)", "Bullet point 2 (cited from Skeptical)"],
-            "conflicts": ["List any contradictions found between the 3 investigations"],
-            "conclusion": "Final rigorous conclusion based ONLY on cross-verified evidence.",
-            "audit_note": "Note on the reliability of the sources (e.g. 'All 3 streams confirm X')."
-        }
     `;
 
     try {

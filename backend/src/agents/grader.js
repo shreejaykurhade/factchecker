@@ -1,6 +1,8 @@
 const { generateWithFallback } = require("../services/llm");
 const { HumanMessage, SystemMessage } = require("@langchain/core/messages");
 
+const { GRADER_PROMPT } = require("../mcp/prompts");
+
 async function graderAgent(state) {
     const { messages } = state;
     const originalQuery = messages[0].content;
@@ -9,35 +11,7 @@ async function graderAgent(state) {
 
     console.log(`[Grader] Grading the analysis...`);
 
-    const systemPrompt = `You are a Truth Adjudicator.
-  Your task is to assign a **Truth Score (0-100)** by evaluating the **Analysis Content**.
-
-  Current Date: ${new Date().toDateString()}
-  User Query: "${originalQuery}"
-  
-  CRITICAL RULES:
-  1. **IGNORE SOURCE URL TITLES**. The search engine sometimes returns messy URLs (e.g., "Horoscope" or "NFL" pages that contain relevant news snippets).
-  2. **FOCUS ON THE ANALYSIS CONTENT**: Read the Conclusion, Summary, and Evidence sections.
-  3. **COMPARE**: Does the Evidence TEXT support or contradict the User Query?
-  
-  SCORING:
-  - If **Conclusion: True** AND the Evidence section contains relevant facts supporting the query → Score **85-100**.
-  - If **Conclusion: False** AND the Evidence shows the query is debunked → Score **0-15**.
-  - If **Conclusion: Misleading** or unclear → Score **40-60**.
-  
-  QUALITY BONUSES (if Conclusion: True):
-  - **100**: Multiple detailed evidence points (3+) with specific facts/dates.
-  - **90-95**: 2-3 solid evidence points.
-  - **80-85**: Single evidence point or weaker support.
-
-  DO NOT penalize based on URL titles like "Horoscope" or "NFL" in the Sources section.
-  
-  Output ONLY a JSON object:
-  {
-    "score": <number 0-100>,
-    "reasoning": "<short explanation>"
-  }
-  `;
+    const systemPrompt = GRADER_PROMPT(new Date().toDateString(), originalQuery);
 
     try {
         const result = await generateWithFallback([

@@ -3,12 +3,11 @@ const express = require('express');
 const cors = require('cors');
 const { connectDB } = require('./src/db/mongo');
 const { runAgent } = require('./src/graph');
-const { saveResult, getHistory } = require('./src/services/store');
-const { TruthDAO } = require('./src/services/dao');
+const { resources } = require('./src/mcp/resources');
 
 const app = express();
 const port = process.env.PORT || 3000;
-const truthDAO = new TruthDAO();
+// Resources initialized in startServer
 
 app.use(cors());
 app.use(express.json());
@@ -21,7 +20,7 @@ app.get('/health', (req, res) => {
 // History endpoint
 app.get('/api/history', async (req, res) => {
     try {
-        const history = await getHistory();
+        const history = await resources.history.list();
         res.json(history);
     } catch (error) {
         console.error("History fetch error:", error);
@@ -33,9 +32,7 @@ app.get('/api/history', async (req, res) => {
 app.get('/api/history/:id', async (req, res) => {
     const { id } = req.params;
     try {
-        // Dynamic import to avoid circular dependency issues if any, or just standard require above
-        const { getResultById } = require('./src/services/store');
-        const result = await getResultById(id);
+        const result = await resources.history.read(id);
 
         if (!result) {
             return res.status(404).json({ error: 'Result not found' });
@@ -59,7 +56,7 @@ app.post('/api/check', async (req, res) => {
         const result = await runAgent(query);
 
         // Save to DB
-        await saveResult(query, result);
+        await resources.history.create(query, result);
 
         // Extract relevant parts for the frontend
         const analysis = result.analysis_data;
@@ -68,7 +65,7 @@ app.post('/api/check', async (req, res) => {
         // Check if gray area (40-60%) - escalate to DAO
         let daoCase = null;
         if (grading && grading.score >= 40 && grading.score <= 60) {
-            const caseId = await truthDAO.escalateCase(query, analysis, grading.score);
+            const caseId = await resources.dao.escalate(query, analysis, grading.score);
             daoCase = {
                 caseId: caseId.toString(),
                 message: "This claim falls in a gray area. Community voting has been initiated.",
@@ -91,7 +88,7 @@ app.post('/api/check', async (req, res) => {
 // DAO Endpoints
 app.get('/api/dao/pending', async (req, res) => {
     try {
-        const cases = await truthDAO.getPendingCases();
+        const cases = await resources.dao.listPending();
         res.json(cases);
     } catch (error) {
         console.error("DAO pending cases error:", error);
@@ -102,7 +99,7 @@ app.get('/api/dao/pending', async (req, res) => {
 app.get('/api/dao/case/:id', async (req, res) => {
     try {
         const { ObjectId } = require('mongodb');
-        const caseData = await truthDAO.getCase(new ObjectId(req.params.id));
+        const caseData = await resources.dao.readCase(new ObjectId(req.params.id));
         if (!caseData) {
             return res.status(404).json({ error: 'Case not found' });
         }
@@ -122,7 +119,7 @@ app.post('/api/dao/vote', async (req, res) => {
         }
 
         const { ObjectId } = require('mongodb');
-        await truthDAO.submitVote(new ObjectId(caseId), voterAddress, vote, reasoning);
+        await resources.dao.vote(new ObjectId(caseId), voterAddress, vote, reasoning);
 
         res.json({ success: true, message: 'Vote submitted successfully' });
     } catch (error) {
@@ -135,11 +132,10 @@ app.post('/api/dao/vote', async (req, res) => {
 app.post('/api/dao/escalate', async (req, res) => {
     try {
         const { historyId } = req.body;
-        const { getResultById, markEscalated } = require('./src/services/store');
         const { runDeepAudit } = require('./src/graph');
 
         // Fetch history item
-        const result = await getResultById(historyId);
+        const result = await resources.history.read(historyId);
         if (!result) {
             return res.status(404).json({ error: 'History item not found' });
         }
@@ -156,10 +152,10 @@ app.post('/api/dao/escalate', async (req, res) => {
 
         // Create DAO case with NEW Audited Analysis
         // We use the original score as a reference, or could re-grade. For now, referencing original score context.
-        const caseId = await truthDAO.escalateCase(result.query, auditedAnalysis, result.grading?.score || 0);
+        const caseId = await resources.dao.escalate(result.query, auditedAnalysis, result.grading?.score || 0);
 
         // Mark history as escalated
-        await markEscalated(historyId);
+        await resources.history.markEscalated(historyId);
 
         res.json({ success: true, caseId: caseId });
 
@@ -171,7 +167,7 @@ app.post('/api/dao/escalate', async (req, res) => {
 
 async function startServer() {
     const db = await connectDB();
-    await truthDAO.initialize(db);
+    await resources.init(db);
     app.listen(port, () => {
         console.log(`Server running at http://localhost:${port}`);
     });
