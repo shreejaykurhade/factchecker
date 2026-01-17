@@ -114,8 +114,8 @@ graph TB
     ORCH -->|1. Parallel Search| INV_MAIN & INV_SKEP & INV_CTX
     INV_MAIN & INV_SKEP & INV_CTX -->|Aggregated Data| ANALYST
     ANALYST -->|Analysis| GRADER
-    GRADER -->|Score < 40 or > 60| API
-    GRADER -->|Score 40-60 (Gray Area)| AUDITOR
+    GRADER -->|"Score < 40 or > 60"| API
+    GRADER -->|"Score 40-60 (Gray Area)"| AUDITOR
     AUDITOR -->|Escalation| RESOURCES
     
     %% External Calls
