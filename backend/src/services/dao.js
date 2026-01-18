@@ -87,9 +87,12 @@ class TruthDAO {
         return await this.collection.find({ status: 'pending' }).toArray();
     }
 
-    // Get case by ID
-    async getCase(caseId) {
-        return await this.collection.findOne({ _id: caseId });
+    // Update onChainId
+    async updateOnChainId(caseId, onChainId) {
+        await this.collection.updateOne(
+            { _id: caseId },
+            { $set: { onChainId: onChainId } }
+        );
     }
 }
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Search, TrendingUp, AlertTriangle, CheckCircle, Loader, Plus, FileText, ChevronRight, Lightbulb, Clock } from 'lucide-react';
+import { Search, TrendingUp, AlertTriangle, CheckCircle, Loader, Plus, FileText, ChevronRight, Lightbulb, Clock, Scale } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { API_ENDPOINTS } from '../config/api';
 
@@ -50,11 +50,7 @@ const Home = () => {
         setResult(null);
     };
 
-    const getScoreClass = (score) => {
-        if (score >= 40 && score <= 60) return 'score-medium';
-        if (score >= 50) return 'score-high';
-        return 'score-low';
-    };
+
 
     const trendingTopics = [
         "Delhi fog January 2026",

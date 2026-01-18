@@ -190,7 +190,7 @@ const DAOCases = () => {
                 </div>
             )}
 
-            <style jsx>{`
+            <style>{`
                 @keyframes slideDown {
                     from {
                         opacity: 0;

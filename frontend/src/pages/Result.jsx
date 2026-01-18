@@ -87,7 +87,7 @@ const Result = () => {
             </div>
 
             {data.grading && (
-                <div className={`score - card ${getScoreClass(data.grading.score)} `}>
+                <div className={`score-card ${getScoreClass(data.grading.score)}`}>
                     <h1 style={{ fontSize: '6rem', margin: 0 }}>{data.grading.score}</h1>
                     <h3>TRUST SCORE</h3>
                     <p style={{ fontStyle: 'italic', fontSize: '1.2rem' }}>"{data.grading.reasoning}"</p>

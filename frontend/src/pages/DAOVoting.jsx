@@ -3,26 +3,21 @@ import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ThumbsUp, ThumbsDown, Users, Clock, Scale, Wallet, AlertCircle, User } from 'lucide-react';
 import { API_ENDPOINTS } from '../config/api';
+import { useWeb3 } from '../context/Web3Context';
 
 const DAOVoting = () => {
     const { caseId } = useParams();
     const navigate = useNavigate();
+    const { account, contract, connectWallet, loading: web3Loading } = useWeb3();
+
     const [caseData, setCaseData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [vote, setVote] = useState('');
     const [reasoning, setReasoning] = useState('');
-    const [voterAddress, setVoterAddress] = useState('');
     const [submitting, setSubmitting] = useState(false);
 
     useEffect(() => {
         fetchCase();
-        // Web2 Simulation: Auto-login
-        let userId = localStorage.getItem('truth_dao_user_id');
-        if (!userId) {
-            userId = 'anon_' + Math.random().toString(36).substr(2, 9);
-            localStorage.setItem('truth_dao_user_id', userId);
-        }
-        setVoterAddress(userId);
     }, [caseId]);
 
     const fetchCase = async () => {
@@ -36,25 +31,83 @@ const DAOVoting = () => {
         }
     };
 
-    const handleVote = async (e) => {
-        e.preventDefault();
-        if (!vote || !voterAddress) return;
+    const handleInitializeOnChain = async () => {
+        if (!account) {
+            alert("Please connect your wallet first!");
+            return;
+        }
 
         setSubmitting(true);
         try {
+            console.log("Initializing case on-chain...");
+            const analysisHash = typeof caseData.analysis === 'string' ? caseData.analysis.substring(0, 50) : "Complex AI Analysis";
+
+            const tx = await contract.escalateCase(caseData.query, analysisHash);
+            const receipt = await tx.wait();
+
+            const event = receipt.logs.find(log => {
+                try {
+                    return contract.interface.parseLog(log)?.name === 'CaseEscalated';
+                } catch (e) {
+                    return false;
+                }
+            });
+
+            const onChainId = Number(contract.interface.parseLog(event).args.id);
+            console.log("On-chain ID generated:", onChainId);
+
+            await axios.patch(`${API_ENDPOINTS.DAO_CASE(caseId)}`, {
+                onChainId: onChainId
+            });
+
+            alert('Case successfully initialized on-chain!');
+            fetchCase();
+        } catch (error) {
+            console.error('Error initializing on-chain:', error);
+            alert('Failed to initialize on blockchain');
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    const handleVote = async (e) => {
+        e.preventDefault();
+        if (!vote) return;
+
+        if (!account) {
+            alert("Please connect your wallet first!");
+            return;
+        }
+
+        if (!caseData.onChainId) {
+            alert("This case needs to be initialized on-chain first!");
+            return;
+        }
+
+        setSubmitting(true);
+        try {
+            const isTrue = vote === 'true';
+            const onChainId = caseData.onChainId;
+
+            console.log(`Voting on-chain for case ${onChainId}...`);
+            const tx = await contract.vote(onChainId, isTrue, reasoning || "");
+            await tx.wait();
+
             await axios.post(API_ENDPOINTS.DAO_VOTE, {
                 caseId,
-                voterAddress, // Using the simulated ID
+                voterAddress: account,
                 vote,
-                reasoning
+                reasoning,
+                txHash: tx.hash
             });
-            alert('Vote submitted successfully!');
-            fetchCase(); // Refresh case data
+
+            alert('Vote submitted on-chain successfully!');
+            fetchCase();
             setVote('');
             setReasoning('');
         } catch (error) {
             console.error('Error submitting vote:', error);
-            alert('Failed to submit vote (You might have already voted)');
+            alert('Failed to submit vote. Check console for details.');
         } finally {
             setSubmitting(false);
         }
@@ -168,13 +221,43 @@ const DAOVoting = () => {
                     <h3>SUBMIT YOUR VOTE</h3>
 
                     <form onSubmit={handleVote}>
-                        <div style={{ marginBottom: '1.5rem', padding: '1rem', background: '#f0f0f0', border: '2px solid black', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <User size={20} />
-                            <div>
-                                <span style={{ fontSize: '0.8rem', display: 'block', color: '#666' }}>ID</span>
-                                <strong>{voterAddress}</strong>
+                        {!account ? (
+                            <div style={{ marginBottom: '1.5rem', padding: '1.5rem', background: '#fff9db', border: '3px dashed #f59f00', textAlign: 'center' }}>
+                                <AlertCircle size={32} style={{ color: '#f59f00', marginBottom: '0.5rem' }} />
+                                <p style={{ fontWeight: 'bold', marginBottom: '1rem' }}>CONNECT WALLET TO VOTE ON-CHAIN</p>
+                                <button
+                                    type="button"
+                                    className="brutal-btn"
+                                    onClick={connectWallet}
+                                    style={{ background: 'black', color: 'white' }}
+                                >
+                                    <Wallet size={18} style={{ marginRight: '8px' }} /> CONNECT METAMASK
+                                </button>
                             </div>
-                        </div>
+                        ) : !caseData.onChainId ? (
+                            <div style={{ marginBottom: '1.5rem', padding: '1.5rem', background: '#e3f2fd', border: '3px solid #1976d2', textAlign: 'center' }}>
+                                <AlertCircle size={32} style={{ color: '#1976d2', marginBottom: '0.5rem' }} />
+                                <h3 style={{ marginBottom: '0.5rem' }}>// BLOCKCHAIN INITIALIZATION REQUIRED</h3>
+                                <p style={{ marginBottom: '1rem' }}>This case hasn't been registered on the blockchain yet. As the first voter, you need to initialize it.</p>
+                                <button
+                                    type="button"
+                                    className="brutal-btn"
+                                    onClick={handleInitializeOnChain}
+                                    disabled={submitting}
+                                    style={{ background: '#1976d2', color: 'white' }}
+                                >
+                                    {submitting ? 'INITIALIZING...' : 'Escalate to Blockchain →'}
+                                </button>
+                            </div>
+                        ) : (
+                            <div style={{ marginBottom: '1.5rem', padding: '1rem', background: '#f0f0f0', border: '2px solid black', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <Wallet size={20} />
+                                <div>
+                                    <span style={{ fontSize: '0.8rem', display: 'block', color: '#666' }}>CONNECTED WALLET (On-Chain ID: #{caseData.onChainId})</span>
+                                    <strong style={{ fontSize: '0.9rem', wordBreak: 'break-all' }}>{account}</strong>
+                                </div>
+                            </div>
+                        )}
 
                         <div style={{ marginBottom: '1rem' }}>
                             <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
@@ -232,10 +315,15 @@ const DAOVoting = () => {
                         <button
                             type="submit"
                             className="brutal-btn"
-                            disabled={!vote || submitting}
-                            style={{ background: 'black', color: 'white', width: '100%' }}
+                            disabled={!vote || submitting || !account}
+                            style={{
+                                background: account ? 'black' : '#ccc',
+                                color: 'white',
+                                width: '100%',
+                                cursor: account ? 'pointer' : 'not-allowed'
+                            }}
                         >
-                            {submitting ? 'SUBMITTING VOTE...' : 'SUBMIT VOTE'}
+                            {submitting ? 'VOTING ON-CHAIN...' : account ? 'SUBMIT ON-CHAIN VOTE' : 'CONNECT WALLET TO VOTE'}
                         </button>
                     </form>
                 </div>

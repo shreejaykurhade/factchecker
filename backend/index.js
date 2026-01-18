@@ -110,6 +110,18 @@ app.get('/api/dao/case/:id', async (req, res) => {
     }
 });
 
+app.patch('/api/dao/case/:id', async (req, res) => {
+    try {
+        const { onChainId } = req.body;
+        const { ObjectId } = require('mongodb');
+        await resources.dao.updateOnChainId(new ObjectId(req.params.id), onChainId);
+        res.json({ success: true });
+    } catch (error) {
+        console.error("DAO case update error:", error);
+        res.status(500).json({ error: 'Failed to update case' });
+    }
+});
+
 app.post('/api/dao/vote', async (req, res) => {
     try {
         const { caseId, voterAddress, vote, reasoning } = req.body;
